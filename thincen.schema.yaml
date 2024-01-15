@@ -1,0 +1,81 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: thincen
+  name: "五笔-英文-拼音混输"
+  version: "0.1"
+  author:
+    - thincen
+  description: |
+    我的 Rime 五笔-拼音-英文 混合输入方案。
+  dependencies:
+    - melt_eng # 英文输入，作为次翻译器挂载到方案
+    - pinyin_simp # 拼音，实现混输并反查
+
+engine:
+  processors:
+    - ascii_composer # 西文和中西文切换
+    - recognizer # 与 match 搭配，处理特定输入码，如网址、反查等
+    - key_binder # 修改键值，如重定义翻页等
+    - speller # 拼写处理
+    - punctuator # 单字符直接映射文字符号
+    - selector # 选字、换页、上下定位
+    - navigator # 处理光标移动
+    - express_editor # 编辑器，处理空格、回车、回退等
+  segmentors:
+    - ascii_segmentor # 西文段落
+    - matcher # 特定输入码，如网址、反查等
+    - abc_segmentor # 常规文字段落
+    - punct_segmentor # 符号数字之类的
+    - fallback_segmentor # 未标识段落，兜底
+  translators:
+    - punct_translator
+    - reverse_lookup_translator # 反查另一方案的输入码
+    - lua_translator@date_translator # 自定义系统变量输出
+    - lua_translator@calculator # 计算器：二元运算，cococo 开头，如 cococo56*34 zcoc24/1024
+    - table_translator
+    - table_translator@melt_eng # 英文输入
+  filters:
+    - uniquifier # 去重复
+    - lua_filter@single_char_first_filter # 单字优先
+#    - lua_filter@single_char_only # 纯单字
+
+translator:
+  dictionary: wubi86_jidian
+  enable_sentence: false # 禁止造句
+  enable_user_dict: false # 禁用用户词典
+  enable_completion: true # 提前显示编码未输入完整的词条
+
+melt_eng:
+  dictionary: en
+  enable_sentence: false # 禁止造句
+  enable_user_dict: false # 禁用用户词典
+  #  initial_quality: 0.1     # 初始权重 注释本条让英文降低位次
+  enable_completion: true # 提前显示编码未输入完整的词条
+  comment_format: # 自定义提示码
+#    - xform/.*//           # 清空提示码
+
+# 输入的编码同时进行拼音反查，实现五笔与拼音的混输
+abc_segmentor:
+  extra_tags:
+    - reverse_lookup
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+
+punctuator:
+  import_preset: default
+
+key_binder:
+  import_preset: default
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: "^/([0-9]+[a-z]*|[a-z]+)$" # 注意前方需要有4个空格，跟下面对齐
+    calculator: "^cococo.*$" # 计算器
