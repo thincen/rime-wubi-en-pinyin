@@ -1,5 +1,6 @@
 # Rime schema settings
 # encoding: utf-8
+# 2024/01/15
 
 schema:
   schema_id: thincen
@@ -38,7 +39,7 @@ engine:
     - table_translator@melt_eng # 英文输入
   filters:
     - uniquifier # 去重复
-    - lua_filter@single_char_first_filter # 单字优先
+#    - lua_filter@single_char_first_filter # 单字优先
 #    - lua_filter@single_char_only # 纯单字
 
 translator:
@@ -77,5 +78,5 @@ key_binder:
 recognizer:
   import_preset: default
   patterns:
-    punct: "^/([0-9]+[a-z]*|[a-z]+)$" # 注意前方需要有4个空格，跟下面对齐
+    punct: "^/([0-9]+[a-z]*|[a-z]+)$" # 匹配 default.custom.yaml 中 symbols 符号
     calculator: "^cococo.*$" # 计算器
